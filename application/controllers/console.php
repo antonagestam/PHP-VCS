@@ -23,12 +23,17 @@
 		private $out = "";
 		private $data = array();
 		private $dir = "/"; // defaults to root
+		private $aliases = array(
+			'pvcs' => 'pvcs_core',
+			'vcs' => 'pvcs_core',
+		);
+		private $query; // current query
 		
 		public function __construct()
 		{
 			parent::Controller();
 			
-			$this->load->library('pvcs');
+			$this->load->library('pvcs_core');
 			
 			// block all computers but mine, while developing
 			if( $this->input->server('REMOTE_ADDR') != '192.168.1.125' )
@@ -39,61 +44,13 @@
 		
 		public function Index()
 		{
-			$query = htmlentities($this->input->post('query'));
-			$split = explode(' ',$query);
-			$command = $split[0];
-			$attributes = "";
-			$user = $this->session->userdata('user');
-			$dir = $this->session->userdata('dir');
-			$queryprint = $user['name'] . '@rep:' . $dir . '$ ';
-			
-			// get query minus command = attributes
-			foreach($split as $index => $attr)
-			{
-				if($index>0)
-				{
-					$attributes .= $attr . "";
-				}
-			}
-			// clean from blankspaces
-			$attributes = trim($attributes);
-			
-			// check if there is a query
-			if( !empty($query) )
-			{
-				// check if the command exists and is allowed
-				if( method_exists($this,$command) && in_array( $command,$this->allowed ) )
-				{
-					// check if there are attributes
-					if( !empty($attributes) )
-					{
-						// execute command
-						$this->$command($attributes);
-					}
-					else
-					{
-						// execute command
-						$this->$command();
-					}
-				}
-				else
-				{
-					// tell user that the command doesn't exist
-					$this->print_ln($command.': command not found');
-				}
-				
-				// update som values
-				$user = $this->session->userdata('user');
-				$dir = $this->session->userdata('dir');
-				$queryprint = $user['name'] . '@rep:' . $dir . '$ ';
-				// print user
-				$this->print_pre_ln($queryprint . $query);
-			}
+			$this->get_query();
+			$this->parse_query();
 			
 			$data = array(
 				'message' => $this->out,
-				'user' => $queryprint,
-				'query' => $query,
+				'user' => 'default',
+				'query' => 'default',
 			);
 			
 			$this->out($data);
@@ -150,13 +107,18 @@
 				$this->print_ln('vars:'.$variables);
 			}
 			// Write string to output
-			$this->out .= $string . "<br/>\n";
+			$this->add_out($string . "<br/>\n");
 		}
 		
 		private function print_pre_ln($string)
 		{
 			// Prepend string to output
-			$this->out = $string . "<br/>\n" . $this->out;
+			$this->add_out($string . "<br/>\n" . $this->out);
+		}
+		
+		private function add_out($string)
+		{
+			$this->out .= $string;
 		}
 		
 		private function clear(){}
@@ -188,5 +150,31 @@
 			$this->ls();
 		}
 		
-		private function data()
+		private function set_data($index,$data)
+		{
+			$this->data[$index] = $data;
+			return true;
+		}
+		
+		private function get_data($index)
+		{
+			return $this->data[$index];
+		}
+		
+		private function get_query()
+		{
+			$query = $this->input->post('query');
+			$this->query = htmlentities($query);
+		}
+		
+		private function parse_query()
+		{
+			if(){}
+			$query = $this->query;
+		}
+		
+		private function login()
+		{
+			// "login as:[]"
+		}
 	}
