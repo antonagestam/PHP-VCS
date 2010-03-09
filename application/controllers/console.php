@@ -29,6 +29,8 @@
 		{
 			parent::Controller();
 			
+			$this->load->library('pvcs');
+			
 			// set userdata (while there is no login device)
 			$this->session->set_userdata('user',array(
 				'name' => 'antonagestam',
@@ -141,11 +143,6 @@
 			$this->load->view($view,$data);
 		}
 		
-		private function commit()
-		{
-			$this->print_ln('This method is not yet done');
-		}
-		
 		private function help()
 		{
 			// Print all allowed commands
@@ -164,6 +161,8 @@
 			return true;
 		}
 		
+		// *************** OBSERVE *************************
+		// the following to functions has to be considered!!
 		private function print_ln($string="")
 		{
 			// Check if there are variables in the string
@@ -194,12 +193,6 @@
 			}
 		}
 		
-		private function add(){}
-		
-		private function rm(){}
-		
-		private function branch(){}
-		
 		private function cd($dir)
 		{
 			if( file_exists($dir) )
@@ -212,51 +205,8 @@
 			}
 		}
 		
-		private function checkout(){}
-		
-		private function print_log(){}
-		
 		private function dir()
 		{
 			$this->ls();
-		}
-		
-		private function status(){}
-		
-		// Create a repository
-		private function init()
-		{
-			$dir = trim($this->session->userdata('dir'),'/').'/';
-			$path = $dir . $this->repdirname;
-			if( file_exists( $path ) && is_dir($path) )
-			{
-				$this->print_ln('Error: There is already a repository in this directory');
-				return false;
-			}
-			else
-			{
-				mkdir($path);
-				$message = "Repository initiated";
-				$this->log($message);
-				$this->print_ln($message);
-				return true;
-			}
-		}
-		
-		// Write to the logfile in the repository
-		private function log($string)
-		{
-			$dir = trim($this->session->userdata('dir'),'/').'/'.$this->repdirname;
-			if( file_exists($dir) && is_dir($dir) )
-			{
-				$message = date('Y-m-d H:i:s')." - ".$string."\n";
-				write_file($dir.'/log.txt',$message,'a');
-				return true;
-			}
-			else
-			{
-				$this->print_ln('Error: There is no repository in this directory');
-				return false;
-			}
 		}
 	}
