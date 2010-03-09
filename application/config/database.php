@@ -38,9 +38,9 @@ $active_group = "default";
 $active_record = TRUE;
 
 $db['default']['hostname'] = "localhost";
-$db['default']['username'] = "antonagestam_se";
-$db['default']['password'] = "m9syP3ui";
-$db['default']['database'] = "antonagestam_se";
+$db['default']['username'] = "";
+$db['default']['password'] = "";
+$db['default']['database'] = "";
 $db['default']['dbdriver'] = "mysql";
 $db['default']['dbprefix'] = "";
 $db['default']['pconnect'] = TRUE;
