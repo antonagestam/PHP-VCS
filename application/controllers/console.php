@@ -187,4 +187,6 @@
 		{
 			$this->ls();
 		}
+		
+		private function data()
 	}
