@@ -1,14 +1,24 @@
 <?php
+	/***
+	 * TODO
+	 *  - commit method
+	 *  - add method
+	 *  - rm method
+	 *  - branch method
+	 *  - checkout method
+	 *  - config method
+	 *  - cd method
+	 *  - ls method
+	 */
 	class Pvcs
 	{
-		var $CI; // Instance of codeigniter stuff, kind of. Not sure if this will be necessary
-		var $cd; // current directory
+		private $version = "PVCS core, version 0.0.1-alpha";
+		private $CI; // Instance of codeigniter stuff, kind of. Not sure if this will be necessary
+		private $cd; // current directory
 		
-		public function __construct($dir=null)
+		public function __construct()
 		{
-			$this->CI =& get_instance();
-			$this->cd = $dir;
-			
+			$this->CI =& get_instance();			
 			log_message('debug','PVCS Class Initialized');
 		}
 		

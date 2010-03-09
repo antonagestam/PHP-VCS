@@ -3,27 +3,26 @@
 	 * 	TODO
 	 *  X attribute handling
 	 *  - suggest command while writing in console
-	 *  - commit method
-	 *  - add method
-	 *  - rm method
-	 *  - branch method
-	 *  - checkout method
-	 *  - config method
-	 *  - cd method
-	 *  - ls method
 	 *  - Show the user the state of the ajax request
-	 *  - Migrate all repository methods to a library and keep the console methods here
+	 *  \ Migrate all repository methods to a library and keep the console methods here
+	 *  	- Create handler for the PVCS core library
+	 *  - Create a data handler (cache?)
 	 */
 	
 	
 	class Console extends Controller
 	{
-		private $allowed = array();
+		private $version = "PVCS console, version 0.0.1-alpha";
+		private $allowed = array(
+				'help',
+				'clear',
+				'cd',
+				'ls',
+				'dir',
+			);
 		private $out = "";
-		private $user = array();
-		private $version;
-		private $dir = "./";
-		private $repdirname = '_rep';
+		private $data = array();
+		private $dir = "/"; // defaults to root
 		
 		public function __construct()
 		{
@@ -31,38 +30,10 @@
 			
 			$this->load->library('pvcs');
 			
-			// set userdata (while there is no login device)
-			$this->session->set_userdata('user',array(
-				'name' => 'antonagestam',
-				'email' => 'msn@antonagestam.se'
-			));
-			
-			// Set list of allowed commands
-			$this->allowed = array(
-				'commit',
-				'help',
-				'print_ln',
-				'clear',
-				'add',
-				'branch',
-				'cd',
-				'checkout',
-				'print_log',
-				'ls',
-				'dir',
-				'rm',
-				'status',
-				'init',
-				'log'
-			);
-			
-			$this->version = "PVCS, version 0.0.1-alpha";
-			
 			// block all computers but mine, while developing
 			if( $this->input->server('REMOTE_ADDR') != '192.168.1.125' )
 			{
-				$this->load->view('clean',array('message'=>'You lack authority'));
-				exit;
+				die('You lack authority');
 			}
 		}
 		
@@ -125,6 +96,11 @@
 				'query' => $query,
 			);
 			
+			$this->out($data);
+		}
+		
+		private function out($data)
+		{
 			// check wether the call was made with ajax or not
 			$xmlrequestedwith = $this->input->server('HTTP_X_REQUESTED_WITH');
 			if( !empty($xmlrequestedwith) && strtolower($xmlrequestedwith) == 'xmlhttprequest' )
@@ -157,6 +133,8 @@
 			{
 				$this->print_ln($method);
 			}
+			
+			$this->print_ln();
 			
 			return true;
 		}
