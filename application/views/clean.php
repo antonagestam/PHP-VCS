@@ -1,7 +1,7 @@
 <?php
 	$array = array(
-		'user' => trim($user),
-		'output' => $message
+		'prompt' => trim($user),
+		'output' => $out
 	);
 	
 	echo json_encode($array);

@@ -7,6 +7,8 @@
 	 *  \ Migrate all repository methods to a library and keep the console methods here
 	 *  	- Create handler for the PVCS core library
 	 *  - Create a data handler (cache?)
+	 *  - Add sha1 and salt to pw, "create user" method
+	 *  - Add support for database stored users
 	 */
 	
 	
@@ -45,18 +47,11 @@
 		public function Index()
 		{
 			$this->get_query();
-			$this->parse_query();
-			
-			$data = array(
-				'message' => $this->out,
-				'user' => 'default',
-				'query' => 'default',
-			);
-			
-			$this->out($data);
+			$prompt = $this->parse_query();
+			$this->out($prompt);
 		}
 		
-		private function out($data)
+		private function out($prompt=NULL)
 		{
 			// check wether the call was made with ajax or not
 			$xmlrequestedwith = $this->input->server('HTTP_X_REQUESTED_WITH');
@@ -71,6 +66,16 @@
 				// If the call was not made with
 				// ajax, use console view.
 				$view = 'console';
+			}
+			
+			$data['out'] = $this->out;
+			if($prompt!==NULL)
+			{
+				$data['prompt'] = $prompt;
+			}
+			else
+			{
+				$data['prompt'] = 'def.prompt';
 			}
 			
 			$this->load->view($view,$data);
@@ -158,7 +163,14 @@
 		
 		private function get_data($index)
 		{
-			return $this->data[$index];
+			if( isset($this->data[$index]) )
+			{
+				return $this->data[$index];
+			}
+			else
+			{
+				return false;
+			}
 		}
 		
 		private function get_query()
@@ -169,12 +181,41 @@
 		
 		private function parse_query()
 		{
-			if(){}
 			$query = $this->query;
+			$user = $this->get_data('user.name');
+			$prompt = 'login as:';
+			
+			if( empty( $user ) && empty( $query ) )
+			{
+				return $prompt;
+			}
+			elseif( !empty( $query ) )
+			{
+				$status = $this->login($query);
+				if($status === true)
+				{
+					return 'username exists!';
+				}
+				else
+				{
+					$this->print_ln('error: wrong username');
+					return $prompt;
+				}
+			}
 		}
 		
-		private function login()
+		private function login($username)
 		{
-			// "login as:[]"
+			$this->config->load('pvcs_users');
+			$users = $this->config->item('users');
+			
+			if( array_key_exists( $username, $users ) )
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
 		}
 	}
