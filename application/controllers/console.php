@@ -57,7 +57,7 @@
 			$this->version = "PVCS, version 0.0.1-alpha";
 			
 			// block all computers but mine, while developing
-			if( $this->input->server('REMOTE_ADDR') != '85.224.206.223' )
+			if( $this->input->server('REMOTE_ADDR') != '192.168.1.125' )
 			{
 				$this->load->view('clean',array('message'=>'You lack authority'));
 				exit;
