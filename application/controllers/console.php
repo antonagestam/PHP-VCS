@@ -12,6 +12,7 @@
 	 *  - cd method
 	 *  - ls method
 	 *  - Show the user the state of the ajax request
+	 *  - Migrate all repository methods to a library and keep the console methods here
 	 */
 	
 	
@@ -39,7 +40,6 @@
 				'commit',
 				'help',
 				'print_ln',
-				'awesomeness',
 				'clear',
 				'add',
 				'branch',

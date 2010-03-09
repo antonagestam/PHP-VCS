@@ -11,7 +11,7 @@
 |	http://example.com/
 |
 */
-$config['base_url']	= "http://labs.antonagestam.se/pvcs/";
+$config['base_url']	= "http://192.168.1.140/pvcs/";
 
 /*
 |--------------------------------------------------------------------------
