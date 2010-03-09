@@ -30,6 +30,10 @@
 			'vcs' => 'pvcs_core',
 		);
 		private $query; // current query
+		private $sessiondata = array(
+			'user.name',
+			'dir'
+		);
 		
 		public function __construct()
 		{
@@ -155,8 +159,12 @@
 			$this->ls();
 		}
 		
-		private function set_data($index,$data)
+		private function set_data($index,$data,$session=false)
 		{
+			if($session===true)
+			{
+				$this->session->set_userdata($index,$data);
+			}
 			$this->data[$index] = $data;
 			return true;
 		}
@@ -171,6 +179,11 @@
 			{
 				return false;
 			}
+		}
+		
+		private function update_data()
+		{
+			
 		}
 		
 		private function get_query()
@@ -191,10 +204,10 @@
 			}
 			elseif( !empty( $query ) )
 			{
-				$status = $this->login($query);
+				$status = $this->check_username($query);
 				if($status === true)
 				{
-					return 'username exists!';
+					return 'password:';
 				}
 				else
 				{
@@ -204,7 +217,7 @@
 			}
 		}
 		
-		private function login($username)
+		private function check_username($username)
 		{
 			$this->config->load('pvcs_users');
 			$users = $this->config->item('users');
@@ -217,5 +230,11 @@
 			{
 				return false;
 			}
+		}
+		
+		public function __destruct()
+		{
+			// can we move the insertion of the data values to the session
+			// cookies to here?
 		}
 	}
