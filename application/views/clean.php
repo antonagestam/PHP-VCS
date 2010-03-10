@@ -1,6 +1,6 @@
 <?php
 	$array = array(
-		'prompt' => trim($user),
+		'prompt' => trim($prompt),
 		'output' => $out
 	);
 	

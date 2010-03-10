@@ -31,7 +31,7 @@
 		);
 		private $query; // current query
 		private $sessiondata = array(
-			'user.name',
+			'user',
 			'dir'
 		);
 		
@@ -49,7 +49,7 @@
 			}
 			
 			// Fetch sessiondata to data cache
-			foreach($sessiondata as $index)
+			foreach($this->sessiondata as $index)
 			{
 				$value = $this->session->userdata($index);
 				if( $value !== FALSE )
@@ -201,24 +201,41 @@
 		private function parse_query()
 		{
 			$query = $this->query;
-			$user = $this->get_data('user.name');
+			$user = $this->get_data('user');
+			$temp_user = $this->get_data('temp_username');
 			$prompt = 'login as:';
 			
 			if( empty( $user ) && empty( $query ) )
 			{
 				return $prompt;
 			}
-			elseif( !empty( $query ) )
+			elseif( !empty( $query ) && empty( $user ) )
 			{
-				$status = $this->check_username($query);
-				if($status === true)
+				if( empty($temp_user) || $temp_user === FALSE )
 				{
-					return 'password:';
+					$status = $this->check_username($query);
+					if($status === TRUE)
+					{
+						return 'password:';
+					}
+					else
+					{
+						$this->print_ln('error: wrong username');
+						return $prompt;
+					}
 				}
 				else
 				{
-					$this->print_ln('error: wrong username');
-					return $prompt;
+					$status = $this->check_password($query);
+					if($status === TRUE)
+					{
+						return 'welcome'; // user @ dir : branch $ ?!?!
+					}
+					else
+					{
+						$this->print_ln('error: wrong password for `'.htmlentities($query).'`');
+						return $prompt;
+					}
 				}
 			}
 		}
@@ -231,17 +248,42 @@
 			if( array_key_exists( $username, $users ) )
 			{
 				$this->set_data('temp_username',$username,TRUE);
-				return true;
+				return TRUE;
 			}
 			else
 			{
-				return false;
+				return FALSE;
 			}
+		}
+		
+		private function check_password($password)
+		{
+			$this->config->load('pvcs_users');
+			$users = $this->config->item('users');
+			$username = $this->get_data('temp_username');
+			$this->remove_data('temp_username');
+			$password = $this->salt_password($password);
+			
+			if( $users[$username] == $password )
+			{
+				$this->set_data('user',$username,TRUE);
+				return TRUE;
+			}
+			else
+			{
+				return FALSE;
+			}
+		}
+		
+		private function salt_password($password)
+		{
+			return $password;
 		}
 		
 		public function __destruct()
 		{
 			// can we move the insertion of the data values to the session
 			// cookies to here?
+			// might be a bad idea ...
 		}
 	}
