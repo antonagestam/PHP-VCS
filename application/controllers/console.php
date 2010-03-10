@@ -32,7 +32,8 @@
 		private $query; // current query
 		private $sessiondata = array(
 			'user',
-			'dir'
+			'dir',
+			'temp_username'
 		);
 		
 		public function __construct()
@@ -47,7 +48,7 @@
 			{
 				die('You lack authority');
 			}
-			
+						
 			// Fetch sessiondata to data cache
 			foreach($this->sessiondata as $index)
 			{
@@ -192,6 +193,12 @@
 			}
 		}
 		
+		private function remove_data($index)
+		{
+			unset($this->data[$index]);
+			$this->session->unset_userdata($index);
+		}
+		
 		private function get_query()
 		{
 			$query = $this->input->post('query');
@@ -203,10 +210,12 @@
 			$query = $this->query;
 			$user = $this->get_data('user');
 			$temp_user = $this->get_data('temp_username');
-			$prompt = 'login as:';
+			$prompt = 'login as:'; // default prompt
 			
 			if( empty( $user ) && empty( $query ) )
 			{
+				// If the query is empty and no user session is active
+				// return the default prompt
 				return $prompt;
 			}
 			elseif( !empty( $query ) && empty( $user ) )
