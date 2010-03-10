@@ -39,12 +39,23 @@
 		{
 			parent::Controller();
 			
+			// Load the core library
 			$this->load->library('pvcs_core');
 			
 			// block all computers but mine, while developing
 			if( $this->input->server('REMOTE_ADDR') != '192.168.1.125' )
 			{
 				die('You lack authority');
+			}
+			
+			// Fetch sessiondata to data cache
+			foreach($sessiondata as $index)
+			{
+				$value = $this->session->userdata($index);
+				if( $value !== FALSE )
+				{
+					$this->set_data($index,$value);
+				}
 			}
 		}
 		
@@ -159,9 +170,9 @@
 			$this->ls();
 		}
 		
-		private function set_data($index,$data,$session=false)
+		private function set_data($index,$data,$session=FALSE)
 		{
-			if($session===true)
+			if( $session===TRUE )
 			{
 				$this->session->set_userdata($index,$data);
 			}
@@ -179,11 +190,6 @@
 			{
 				return false;
 			}
-		}
-		
-		private function update_data()
-		{
-			
 		}
 		
 		private function get_query()
@@ -224,6 +230,7 @@
 			
 			if( array_key_exists( $username, $users ) )
 			{
+				$this->set_data('temp_username',$username,TRUE);
 				return true;
 			}
 			else
