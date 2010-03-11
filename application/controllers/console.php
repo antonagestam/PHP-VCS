@@ -28,6 +28,7 @@
 				'cd' => array(1,1),
 				'ls' => array(1,0),
 				'dir' => array(1,0),
+				'pvcs' => array(1,1),
 			);
 		private $out = "";
 		private $data = array();
@@ -178,8 +179,8 @@
 		
 		private function ls()
 		{
-			$path = trim($this->session->userdata('dir'),'/').'/';
-			$files = get_filenames($path);
+			$path = trim($this->get_data('dir'),'/').'/';
+			$files = glob($path.'*');
 			foreach($files as $file)
 			{
 				$this->print_ln(basename($file));
@@ -206,7 +207,7 @@
 					$getdir = $this->get_data('dir');
 					if($getdir != FALSE)
 					{
-						$dir = $getdir.$dir;
+						$dir = $getdir.'/'.$dir;
 					}
 					$this->set_data('dir',$dir,TRUE);
 				}
@@ -408,6 +409,11 @@
 		private function salt_password($password)
 		{
 			return $password;
+		}
+		
+		private function pvcs($command)
+		{
+			$this->print_ln($command);
 		}
 		
 		public function __destruct()
