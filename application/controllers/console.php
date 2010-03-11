@@ -1,7 +1,12 @@
 <?php
 	/***
+	 * Legend:
+	 * - To be done
+	 * \ Initiated
+	 * X Done
+	 * 
 	 * 	TODO
-	 *  X attribute handling
+	 *  - attribute handling
 	 *  - suggest command while writing in console
 	 *  - Show the user the state of the ajax request
 	 *  \ Migrate all repository methods to a library and keep the console methods here
@@ -15,7 +20,7 @@
 	class Console extends Controller
 	{
 		private $version = "PVCS console, version 0.0.1-alpha";
-		private $allowed = array(
+		private $allowed_commands = array(
 				'help',
 				'clear',
 				'cd',
@@ -33,7 +38,9 @@
 		private $sessiondata = array(
 			'user',
 			'dir',
-			'temp_username'
+			'temp_username',
+			'default_prompt',
+			'branch'
 		);
 		
 		public function __construct()
@@ -57,6 +64,20 @@
 				{
 					$this->set_data($index,$value);
 				}
+			}
+			
+			// Set default branch to master
+			$branch = $this->get_data('branch');
+			if( empty($branch) || $branch === FALSE )
+			{
+				$this->set_data('branch','master',TRUE);
+			}
+			
+			// Set default dir to root
+			$dir = $this->get_data('dir');
+			if( empty($dir) || $dir === FALSE )
+			{
+				$this->set_data('dir','/',TRUE);
 			}
 		}
 		
@@ -91,7 +112,7 @@
 			}
 			else
 			{
-				$data['prompt'] = 'def.prompt';
+				$data['prompt'] = $this->get_data('default_prompt');
 			}
 			
 			$this->load->view($view,$data);
@@ -100,7 +121,7 @@
 		private function help()
 		{
 			// Print all allowed commands
-			$methods = $this->allowed;
+			$methods = $this->allowed_commands;
 			sort($methods);
 			
 			$this->print_ln($this->version);
@@ -238,7 +259,8 @@
 					$status = $this->check_password($query);
 					if($status === TRUE)
 					{
-						return 'welcome'; // user @ dir : branch $ ?!?!
+						$this->set_prompt();
+						return $this->get_data('default_prompt');
 					}
 					else
 					{
@@ -247,6 +269,26 @@
 					}
 				}
 			}
+		}
+		
+		private function set_prompt($user=NULL,$branch=NULL,$dir=NULL)
+		{
+			if($user==NULL)
+			{
+				$user = $this->get_data('user');
+			}
+			if($branch==NULL)
+			{
+				$branch = $this->get_data('branch');
+			}
+			if($dir==NULL)
+			{
+				$dir = $this->get_data('dir');
+			}
+			
+			$prompt = $user.'@'.$branch.': '.$dir.'$';
+			
+			$this->set_data('default_prompt',$prompt,TRUE);
 		}
 		
 		private function check_username($username)
