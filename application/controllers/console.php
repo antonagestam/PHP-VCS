@@ -269,6 +269,12 @@
 					}
 				}
 			}
+			elseif( !empty( $query ) && !empty( $user ) )
+			{
+				preg_match('#^(\w+)[[ \w*]|$]#',$query,$matches);
+				$command = $matches[0];
+				$this->print_ln($command);
+			}
 		}
 		
 		private function set_prompt($user=NULL,$branch=NULL,$dir=NULL)
