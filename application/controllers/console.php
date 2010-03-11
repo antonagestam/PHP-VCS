@@ -156,7 +156,7 @@
 		}
 		
 		// *************** OBSERVE *************************
-		// the following to functions has to be considered!!
+		// the following two functions has to be considered!!
 		private function print_ln($string="")
 		{
 			// Write string to output
@@ -188,13 +188,34 @@
 		
 		private function cd($dir)
 		{
+			/*
+			 * special chars ?
+			 * .
+			 * ..
+			 * /
+			 * ~ = favorite file? :)
+			 */
 			if( file_exists($dir) )
 			{
-				$this->session->set_userdata('dir',$dir);
+				if( $dir[0] == '/' )
+				{
+					$this->set_data('dir',$dir,TRUE);
+				}
+				else
+				{
+					$getdir = $this->get_data('dir');
+					if($getdir != FALSE)
+					{
+						$dir = $getdir.$dir;
+					}
+					$this->set_data('dir',$dir,TRUE);
+				}
+				
+				$this->set_prompt(NULL,NULL,$dir);
 			}
 			else
 			{
-				$this->session->set_userdata('dir','false');
+				$this->print_ln('error: no such file or directory');
 			}
 		}
 		
