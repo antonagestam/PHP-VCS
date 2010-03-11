@@ -29,6 +29,7 @@
 				'ls' => array(1,0),
 				'dir' => array(1,0),
 				'pvcs' => array(1,1),
+				'logout' => array(0,0),
 			);
 		private $out = "";
 		private $data = array();
@@ -312,7 +313,12 @@
 				$command = $matches[0];
 				$strlen = strlen($command);
 				$command = trim($matches[0]);
-				$attributes = explode(" ",substr($query,$strlen));
+				$attributes = explode( " ", trim(substr(trim($query),$strlen)) );
+				
+				if( count( $attributes ) == 1 && empty( $attributes[0] ) )
+				{
+					unset($attributes[0]);
+				}
 				
 				// Get all allowed commands
 				$commands = $this->allowed_commands;
@@ -320,21 +326,22 @@
 				// Check if the method exists and the command is allowed
 				if( array_key_exists($command,$commands) && method_exists($this,$command) )
 				{
-					if( count($attributes) > $commands[$command][0] )
+					$count = count($attributes);
+					if( $count > $commands[$command][0] )
 					{
-						$this->print_ln('error: wrong parameter count');
+						$this->print_ln('error: wrong parameter count[1]; '.$count);
 					}
-					elseif( count($attributes) < $commands[$command][1] )
+					elseif( $count < $commands[$command][1] )
 					{
-						$this->print_ln('error: wrong parameter count');
+						$this->print_ln('error: wrong parameter count[2]'.$count);
 					}
 					else
 					{
-						if( count($attributes) == 1 )
+						if( $count == 1 )
 						{
 							$this->$command($attributes[0]);
 						}
-						elseif( count($attributes) < 1 )
+						elseif( $count < 1 )
 						{
 							$this->$command();
 						}
@@ -404,6 +411,19 @@
 			{
 				return FALSE;
 			}
+		}
+		
+		private function logout()
+		{
+			$sessiondata = $this->sessiondata;
+			foreach($sessiondata as $variable)
+			{
+				if( $this->get_data($variable) != FALSE )
+				{
+					$this->session->unset_userdata($variable);
+				}
+			}
+			$this->print_ln('Logged out');
 		}
 		
 		private function salt_password($password)
