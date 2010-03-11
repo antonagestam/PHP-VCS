@@ -21,11 +21,13 @@
 	{
 		private $version = "PVCS console, version 0.0.1-alpha";
 		private $allowed_commands = array(
-				'help',
-				'clear',
-				'cd',
-				'ls',
-				'dir',
+				// The allowed commands is stored according to this pattern:
+				// '_method name_' => array(_max paramaters_,_min parameters_),
+				'help' => array(1,0),
+				'clear' => array(0,0),
+				'cd' => array(1,1),
+				'ls' => array(1,0),
+				'dir' => array(1,0),
 			);
 		private $out = "";
 		private $data = array();
@@ -118,22 +120,37 @@
 			$this->load->view($view,$data);
 		}
 		
-		private function help()
+		private function help($command=NULL)
 		{
-			// Print all allowed commands
+			// Get all allowed commands
 			$methods = $this->allowed_commands;
-			sort($methods);
 			
-			$this->print_ln($this->version);
-			$this->print_ln("These are the shell commands");
-			$this->print_ln();
-			
-			foreach($methods as $method)
+			if( $command == NULL )
 			{
-				$this->print_ln($method);
+				// Print version etc
+				$this->print_ln($this->version);
+				$this->print_ln("These are the shell commands");
+				$this->print_ln();
+				
+				// Print allowed commands
+				foreach($methods as $key => $method)
+				{
+					$this->print_ln($key);
+				}
+				
+				$this->print_ln();
 			}
-			
-			$this->print_ln();
+			else
+			{
+				if( array_key_exists($command,$methods) && method_exists($this,$command) )
+				{
+					$this->print_ln('The `'.$command.'` command takes '.$methods[$command][0].' parameters');
+				}
+				else
+				{
+					$this->print_ln('error: command `'.$command.'` does not exist');
+				}
+			}
 			
 			return true;
 		}
@@ -142,12 +159,6 @@
 		// the following to functions has to be considered!!
 		private function print_ln($string="")
 		{
-			// Check if there are variables in the string
-			$match = preg_match('#config\.(.+)? #',$string,$variables);
-			if($match>0)
-			{
-				$this->print_ln('vars:'.$variables);
-			}
 			// Write string to output
 			$this->add_out($string . "<br/>\n");
 		}
@@ -271,9 +282,50 @@
 			}
 			elseif( !empty( $query ) && !empty( $user ) )
 			{
+				// Print the query
+				$this->print_ln($this->get_data('default_prompt').' '.$query);
+				
+				// Fetch the the command (method) from the query
 				preg_match('#^(\w+)[[ \w*]|$]#',$query,$matches);
 				$command = $matches[0];
-				$this->print_ln($command);
+				$strlen = strlen($command);
+				$command = trim($matches[0]);
+				$attributes = explode(" ",substr($query,$strlen));
+				
+				// Get all allowed commands
+				$commands = $this->allowed_commands;
+				
+				// Check if the method exists and the command is allowed
+				if( array_key_exists($command,$commands) && method_exists($this,$command) )
+				{
+					if( count($attributes) > $commands[$command][0] )
+					{
+						$this->print_ln('error: wrong parameter count');
+					}
+					elseif( count($attributes) < $commands[$command][1] )
+					{
+						$this->print_ln('error: wrong parameter count');
+					}
+					else
+					{
+						if( count($attributes) == 1 )
+						{
+							$this->$command($attributes[0]);
+						}
+						elseif( count($attributes) < 1 )
+						{
+							$this->$command();
+						}
+						else
+						{
+							$this->$command($attributes);
+						}
+					}
+				}
+				else
+				{
+					$this->print_ln('error: command does not exist');
+				}
 			}
 		}
 		
