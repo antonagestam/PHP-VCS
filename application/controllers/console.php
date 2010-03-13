@@ -12,8 +12,10 @@
 	 *  \ Migrate all repository methods to a library and keep the console methods here
 	 *  	- Create handler for the PVCS core library
 	 *  - Create a data handler (cache?)
-	 *  - Add sha1 and salt to pw, "create user" method
+	 *  - Add sha1 and salt to pw
+	 *  - Create create_user() method
 	 *  - Add support for database stored users
+	 *  - Add support for aliases
 	 */
 	
 	
@@ -37,6 +39,9 @@
 		private $aliases = array(
 			'pvcs' => 'pvcs_core',
 			'vcs' => 'pvcs_core',
+		);
+		private $libraries = array(
+			'pvcs_core',
 		);
 		private $query; // current query
 		private $sessiondata = array(
@@ -322,6 +327,7 @@
 				
 				// Get all allowed commands
 				$commands = $this->allowed_commands;
+				$libraries = $this->libraries;
 				
 				// Check if the method exists and the command is allowed
 				if( array_key_exists($command,$commands) && method_exists($this,$command) )
@@ -349,6 +355,40 @@
 						{
 							$this->$command($attributes);
 						}
+					}
+				}
+				elseif( in_array($command,$libraries) )
+				{
+					// Set $library to $command
+					$library = $command;
+					// Glue together the attributes
+					$attr_str = trim( implode(" ",$attributes) );
+					// Extract the command
+					preg_match('#^(\w+)[[ \w*]|$]#',$attr_str,$matches);
+					// Fetch command from matches
+					$command = $matches[0];
+					
+					// Load library
+					$this->load->library($library);
+					
+					// Check if the command exist
+					if( method_exists( $this->$library, $command ) )
+					{
+						// Execute method
+						$this->$library->$command();
+						// Get the libraries output
+						if( method_exists( $this->$library, 'get_output' ) )
+						{
+							$this->add_out($this->$library->get_output());
+						}
+						else
+						{
+							$this->print_ln('error: get_output is missing in library `'.$library.'`');
+						}
+					}
+					else
+					{
+						$this->print_ln('error: command does not exist in library `'.$library.'`');
 					}
 				}
 				else

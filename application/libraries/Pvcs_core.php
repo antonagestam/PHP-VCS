@@ -9,17 +9,35 @@
 	 *  - config method
 	 *  - cd method
 	 *  - ls method
+	 *  - help method
 	 */
 	class Pvcs_core
 	{
 		private $version = "PVCS core, version 0.0.1-alpha";
 		private $CI; // Instance of codeigniter stuff, kind of. Not sure if this will be necessary
 		private $cd; // current directory
+		private $allowed_commands = array();
+		private $out;
 		
 		public function __construct()
 		{
-			$this->CI =& get_instance();			
-			log_message('debug','PVCS Class Initialized');
+			// enables me to use the codeigniter stuff in this class
+			$this->CI =& get_instance();
+			
+			//define allowed commands
+			$this->allowed_commands = array(
+				'help' => array(1,0),
+				'init' => array(0,0),
+			);
+		}
+		
+		public function help($command=NULL)
+		{
+			$methods = $this->allowed_commands;
+			foreach($methods as $method => $data)
+			{
+				$this->print_ln($method);
+			}
 		}
 		
 		// Write to the logfile in the repository
@@ -72,5 +90,21 @@
 		public function commit()
 		{
 			$this->print_ln('This method is not yet done');
+		}
+		
+		// Output methods
+		private function add_out($string)
+		{
+			$this->out .= $string;
+		}
+		
+		public function get_output()
+		{
+			return $this->out;
+		}
+		
+		private function print_ln($string)
+		{
+			$this->add_out($string."<br/>\n");
 		}
 	}
