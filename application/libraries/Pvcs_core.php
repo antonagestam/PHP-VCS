@@ -10,34 +10,57 @@
 	 *  - cd method
 	 *  - ls method
 	 *  - help method
+	 *  - Migrate a lot of configuration to /application/config/pvcs_core.php
 	 */
 	class Pvcs_core
 	{
 		private $version = "PVCS core, version 0.0.1-alpha";
 		private $CI; // Instance of codeigniter stuff, kind of. Not sure if this will be necessary
-		private $cd; // current directory
-		private $allowed_commands = array();
+		private $dir; // current directory
+		public $allowed_commands = array();
 		private $out;
 		
-		public function __construct()
+		public function __construct($input_data=array())
 		{
 			// enables me to use the codeigniter stuff in this class
 			$this->CI =& get_instance();
+			
+			if( !isset($input_data['dir']) )
+			{
+				$this->print_ln('warning: __constructor() is missing it\'s first argument in PVCS core');
+			}
+			else
+			{
+				$this->dir = $input_data['dir'];
+			}
+			
 			
 			//define allowed commands
 			$this->allowed_commands = array(
 				'help' => array(1,0),
 				'init' => array(0,0),
+				'commit' => array(0,0),
+				'status' => array(0,0),
+				'rm' => array(0,0),
+				'add' => array(0,0),
+				'branch' => array(0,0),
+				'checkout' => array(0,0),
 			);
 		}
 		
 		public function help($command=NULL)
 		{
 			$methods = $this->allowed_commands;
+			$version = $this->version;
+			
+			$this->print_ln($version);
+			$this->print_ln('These are the methods of the PVCS Core library');
+			$this->print_ln();
 			foreach($methods as $method => $data)
 			{
 				$this->print_ln($method);
 			}
+			$this->print_ln();
 		}
 		
 		// Write to the logfile in the repository
@@ -103,7 +126,7 @@
 			return $this->out;
 		}
 		
-		private function print_ln($string)
+		private function print_ln($string=NULL)
 		{
 			$this->add_out($string."<br/>\n");
 		}

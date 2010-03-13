@@ -4,18 +4,25 @@
 	 * - To be done
 	 * \ Initiated
 	 * X Done
+	 * ? Question/goal
+	 * D Deleted = not valid
 	 * 
 	 * 	TODO
 	 *  - attribute handling
 	 *  - suggest command while writing in console
 	 *  - Show the user the state of the ajax request
 	 *  \ Migrate all repository methods to a library and keep the console methods here
-	 *  	- Create handler for the PVCS core library
+	 *  	D Create handler for the PVCS core library
+	 *  	- Create generic handler of libraries
+	 *  		? Use call_user_func_array()?
 	 *  - Create a data handler (cache?)
 	 *  - Add sha1 and salt to pw
 	 *  - Create create_user() method
 	 *  - Add support for database stored users
 	 *  - Add support for aliases
+	 *  - Migrate a lot of configuration to /application/config/console.php
+	 *  ? Can parse_query() use call_user_func_array()?
+	 *  - Fix utilize_aliases() method
 	 */
 	
 	
@@ -368,8 +375,13 @@
 					// Fetch command from matches
 					$command = $matches[0];
 					
+					// Data to pass to the library's constructor
+					$config = array(
+						'dir' => $this->get_data('dir')
+					);
+					
 					// Load library
-					$this->load->library($library);
+					$this->load->library($library,$config);
 					
 					// Check if the command exist
 					if( method_exists( $this->$library, $command ) )
@@ -393,7 +405,7 @@
 				}
 				else
 				{
-					$this->print_ln('error: command does not exist');
+					$this->print_ln('error: no such command or library');
 				}
 			}
 		}
@@ -471,9 +483,18 @@
 			return $password;
 		}
 		
-		private function pvcs($command)
+		private function Utilize_aliases($string)
 		{
-			$this->print_ln($command);
+			if( !empty($string) )
+			{
+				$aliases = $this->aliases;
+				foreach( $aliases as $needle => $replace )
+				{
+					$string = str_replace($needle,$replace,$string);
+				}
+			}
+			
+			return $string;
 		}
 		
 		public function __destruct()
