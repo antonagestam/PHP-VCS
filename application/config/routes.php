@@ -42,6 +42,7 @@
 
 $route['default_controller'] = "console";
 $route['scaffolding_trigger'] = "";
+$route['static:any'] = 'static_files';
 
 
 /* End of file routes.php */
