@@ -51,16 +51,24 @@
 		public function help($command=NULL)
 		{
 			$methods = $this->allowed_commands;
-			$version = $this->version;
 			
-			$this->print_ln($version);
-			$this->print_ln('These are the methods of the PVCS Core library');
-			$this->print_ln();
-			foreach($methods as $method => $data)
+			if( $command == NULL )
 			{
-				$this->print_ln($method);
+				$version = $this->version;
+				
+				$this->print_ln($version);
+				$this->print_ln('These are the methods of the PVCS Core library');
+				$this->print_ln();
+				foreach($methods as $method => $data)
+				{
+					$this->print_ln($method);
+				}
+				$this->print_ln();
 			}
-			$this->print_ln();
+			elseif( method_exists($this,$command) && array_key_exists($command,$methods) )
+			{
+				print_ln('*method specific help*');
+			}
 		}
 		
 		// Write to the logfile in the repository

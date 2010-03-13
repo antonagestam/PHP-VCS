@@ -373,7 +373,7 @@
 					// Extract the command
 					preg_match('#^(\w+)[[ \w*]|$]#',$attr_str,$matches);
 					// Fetch command from matches
-					$command = $matches[0];
+					$command = trim($matches[0]);
 					
 					// Data to pass to the library's constructor
 					$config = array(
@@ -400,7 +400,7 @@
 					}
 					else
 					{
-						$this->print_ln('error: command does not exist in library `'.$library.'`');
+						$this->print_ln('error: command `'.$command.'`does not exist in library `'.$library.'`');
 					}
 				}
 				else
@@ -502,5 +502,6 @@
 			// can we move the insertion of the data values to the session
 			// cookies to here?
 			// might be a bad idea ...
+			$this->print_ln('the end');
 		}
 	}
