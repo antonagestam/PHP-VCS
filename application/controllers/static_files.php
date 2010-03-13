@@ -4,7 +4,7 @@
 		public function __construct()
 		{
 			parent::Controller();
-			echo 'eh';
+			$this->load->scaffolding('hej')
 		}
 		
 		public function Index()
