@@ -24,6 +24,8 @@
 	 *  ? Can parse_query() use call_user_func_array()?
 	 *  - Fix utilize_aliases() method
 	 */
+
+	define('STATIC_DIRECTORY',getcwd());
 	
 	
 	class Console extends Controller
@@ -198,21 +200,25 @@
 		
 		private function cd($new_dir)
 		{
-			// Update current directory
-			$this->update_current_dir();
+			// Go to the current directory
+			chdir($this->get_data('dir'));
 			
-			// Get current directory
-			$org_dir = getcwd();
-			
-			if( @chdir($new_dir) !== TRUE )
+			// If it exists, go to the new directory
+			if( @chdir($new_dir) === TRUE )
 			{
-				$this->print_ln('error: no such directory');
+				// Set new directory
+				$this->set_data('dir',getcwd(),TRUE);
 			}
 			else
 			{
-				// Restore current directory
-				chdir($org_dir);
+				$this->print_ln('error: no such directory');
 			}
+			
+			// Set defualt directory
+			chdir(STATIC_DIRECTORY);
+			
+			// Update directory
+			$this->update_current_dir();
 		}
 		
 		private function update_current_dir()
@@ -220,13 +226,14 @@
 			$current_dir = $this->get_data('dir');
 			if( $current_dir === FALSE || empty($current_dir))
 			{
-				$this->set_data('dir',getcwd());
+				$this->set_data('dir',getcwd(),TRUE);
 			}
+			
+			$this->set_prompt();
 		}
 		
 		private function gcd()
 		{
-			$this->update_current_dir();
 			$this->print_ln('current directory is '.$this->get_data('dir'));
 		}
 		
@@ -462,7 +469,7 @@
 			}
 		}
 		
-		private function logout()
+		public function logout()
 		{
 			$sessiondata = $this->sessiondata;
 			foreach($sessiondata as $variable)
