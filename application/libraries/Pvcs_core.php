@@ -20,20 +20,10 @@
 		public $allowed_commands = array();
 		private $out;
 		
-		public function __construct($input_data=array())
+		public function __construct()
 		{
 			// enables me to use the codeigniter stuff in this class
 			$this->CI =& get_instance();
-			
-			if( !isset($input_data['dir']) )
-			{
-				$this->print_ln('warning: __constructor() is missing it\'s first argument in PVCS core');
-			}
-			else
-			{
-				$this->dir = $input_data['dir'];
-			}
-			
 			
 			//define allowed commands
 			$this->allowed_commands = array(
@@ -93,20 +83,30 @@
 		// Create a repository
 		public function init()
 		{
-			$dir = trim($this->session->userdata('dir'),'/').'/';
-			$path = $dir . $this->repdirname;
-			if( file_exists( $path ) && is_dir($path) )
+			$repository_path = $this->dir . '/_repo';
+			// Check if there is already an installed repository in current directory
+			if( is_dir( $repository_path ) )
 			{
-				$this->print_ln('Error: There is already a repository in this directory');
-				return false;
+				$this->print_ln('error: there is already a repository in current directory');
 			}
 			else
 			{
-				mkdir($path);
-				$message = "Repository initiated";
-				$this->log($message);
-				$this->print_ln($message);
-				return true;
+				// Try to create some folders
+				$this->mkdir($repository_path);
+				$this->mkdir($repository_path.'/parts');
+				$this->mkdir($repository_path.'/commits');
+			}
+		}
+		
+		private function mkdir($path)
+		{
+			if( mkdir($path) )
+			{
+				$this->print_ln('mkdir succeeded');
+			}
+			else
+			{
+				$this->print_ln('error: mkdir failed');
 			}
 		}
 		
@@ -137,5 +137,10 @@
 		private function print_ln($string=NULL)
 		{
 			$this->add_out($string."<br/>\n");
+		}
+		
+		public function set_dir($dir)
+		{
+			$this->dir = $dir;
 		}
 	}

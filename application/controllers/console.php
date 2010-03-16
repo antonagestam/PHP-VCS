@@ -8,14 +8,14 @@
 	 * D Deleted = not valid
 	 * 
 	 * 	TODO
-	 *  - attribute handling
+	 *  \ attribute handling
 	 *  - suggest command while writing in console
-	 *  - Show the user the state of the ajax request
+	 *  X Show the user the state of the ajax request
 	 *  \ Migrate all repository methods to a library and keep the console methods here
 	 *  	D Create handler for the PVCS core library
 	 *  	- Create generic handler of libraries
 	 *  		? Use call_user_func_array()?
-	 *  - Create a data handler (cache?)
+	 *  X Create a data handler (cache?)
 	 *  - Add sha1 and salt to pw
 	 *  - Create create_user() method
 	 *  - Add support for database stored users
@@ -379,19 +379,22 @@
 					// Fetch command from matches
 					$command = trim($matches[0]);
 					
-					// Data to pass to the library's constructor
-					$config = array(
-						'dir' => $this->get_data('dir')
-					);
-					
 					// Load library
-					$this->load->library($library,$config);
+					$this->load->library($library);
 					
 					// Check if the command exist
 					if( method_exists( $this->$library, $command ) )
 					{
+						// If set_dir exists, set the directory
+						if( method_exists( $this->$library, 'set_dir' ) )
+						{
+							$dir = $this->get_data('dir');
+							$this->$library->set_dir($dir);
+						}
+						
 						// Execute method
 						$this->$library->$command();
+						
 						// Get the libraries output
 						if( method_exists( $this->$library, 'get_output' ) )
 						{
