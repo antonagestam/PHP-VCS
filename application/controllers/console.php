@@ -39,10 +39,10 @@
 				'dir' => array(1,0),
 				'pvcs' => array(1,1),
 				'logout' => array(0,0),
+				'gcd' => array(0,0),
 			);
 		private $out = "";
 		private $data = array();
-		private $dir = "/"; // defaults to root
 		private $aliases = array(
 			'pvcs' => 'pvcs_core',
 			'vcs' => 'pvcs_core',
@@ -89,12 +89,8 @@
 				$this->set_data('branch','master',TRUE);
 			}
 			
-			// Set default dir to root
-			$dir = $this->get_data('dir');
-			if( empty($dir) || $dir === FALSE )
-			{
-				$this->set_data('dir','/',TRUE);
-			}
+			// Update current directory
+			$this->update_current_dir();
 		}
 		
 		public function Index()
@@ -192,45 +188,46 @@
 		
 		private function ls()
 		{
-			$path = trim($this->get_data('dir'),'/').'/';
-			$files = glob($path.'*');
+			$path = $this->get_data('dir');
+			$files = glob($path.'/*');
 			foreach($files as $file)
 			{
 				$this->print_ln(basename($file));
 			}
 		}
 		
-		private function cd($dir)
+		private function cd($new_dir)
 		{
-			/*
-			 * special chars ?
-			 * .
-			 * ..
-			 * /
-			 * ~ = favorite file? :)
-			 */
-			if( file_exists($dir) )
+			// Update current directory
+			$this->update_current_dir();
+			
+			// Get current directory
+			$org_dir = getcwd();
+			
+			if( @chdir($new_dir) !== TRUE )
 			{
-				if( $dir[0] == '/' )
-				{
-					$this->set_data('dir',$dir,TRUE);
-				}
-				else
-				{
-					$getdir = $this->get_data('dir');
-					if($getdir != FALSE)
-					{
-						$dir = $getdir.'/'.$dir;
-					}
-					$this->set_data('dir',$dir,TRUE);
-				}
-				
-				$this->set_prompt(NULL,NULL,$dir);
+				$this->print_ln('error: no such directory');
 			}
 			else
 			{
-				$this->print_ln('error: no such file or directory');
+				// Restore current directory
+				chdir($org_dir);
 			}
+		}
+		
+		private function update_current_dir()
+		{
+			$current_dir = $this->get_data('dir');
+			if( $current_dir === FALSE || empty($current_dir))
+			{
+				$this->set_data('dir',getcwd());
+			}
+		}
+		
+		private function gcd()
+		{
+			$this->update_current_dir();
+			$this->print_ln('current directory is '.$this->get_data('dir'));
 		}
 		
 		private function dir()
