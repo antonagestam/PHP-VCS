@@ -30,7 +30,7 @@
 	
 	class Console extends Controller
 	{
-		private $version = "PVCS console, version 0.0.1-alpha";
+		private $version = "PVCS console, version 0.0.2-beta";
 		private $allowed_commands = array(
 				// The allowed commands is stored according to this pattern:
 				// '_method name_' => array(_max paramaters_,_min parameters_),
