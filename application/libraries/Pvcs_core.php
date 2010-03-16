@@ -64,18 +64,8 @@
 		// Write to the logfile in the repository
 		public function log($string)
 		{
-			$dir = trim($this->session->userdata('dir'),'/').'/'.$this->repdirname;
-			if( file_exists($dir) && is_dir($dir) )
-			{
-				$message = date('Y-m-d H:i:s')." - ".$string."\n";
-				write_file($dir.'/log.txt',$message,'a');
-				return true;
-			}
-			else
-			{
-				$this->print_ln('Error: There is no repository in this directory');
-				return false;
-			}
+			$file = $this->dir . '/_repo/log.txt';
+			$this->mk($file,"\n".$string);
 		}
 		
 		public function status(){}
@@ -95,6 +85,13 @@
 				$this->mkdir($repository_path);
 				$this->mkdir($repository_path.'/parts');
 				$this->mkdir($repository_path.'/commits');
+				
+				// Try to create some files
+				$this->mk($repository_path.'/commits/commits.txt');
+				
+				$success = 'Successfully initiated repository';
+				$this->log($success);
+				$this->print_ln($success);
 			}
 		}
 		
@@ -110,6 +107,18 @@
 			}
 		}
 		
+		private function mk($file,$contents=NULL)
+		{
+			if( @file_put_contents($file,$contents,FILE_APPEND) === FALSE )
+			{
+				$this->print_ln('error: mk failed');
+			}
+			else
+			{
+				$this->print_ln('mk succeeded');
+			}
+		}
+		
 		public function checkout(){}
 		
 		public function add(){}
@@ -120,7 +129,39 @@
 		
 		public function commit()
 		{
-			$this->print_ln('This method is not yet done');
+			// Get all files in the repository
+			$files = get_filenames($this->dir,TRUE);
+			
+			// This is what will be removed
+			$remove = $this->dir.'/';
+			
+			$all_files = "";
+			
+			foreach( $files as $index => $file )
+			{
+				$file = preg_replace('#^'.$remove.'#','',$file);
+				$all_files .= file_get_contents($file);
+				$files[$index] = $file;
+			}
+			
+			$commit_name = sha1($all_files);
+			
+			// Loop through the files
+			foreach( $files as $file )
+			{
+				// Delete dat shit
+				$nfile = preg_replace('#^'.$remove.'#','',$file);
+				
+				// Make sure the _repo files are not archived
+				if( preg_match('#^_repo/#',$nfile) )
+				{
+					continue;
+				}
+				
+				$part_file_name = sha1($nfile);
+				
+				$this->print_ln($nfile . ': created part-file; '.$part_file_name);
+			}
 		}
 		
 		// Output methods
