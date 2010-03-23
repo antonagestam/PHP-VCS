@@ -11,11 +11,12 @@
 	 *  - ls method
 	 *  - help method
 	 *  - Migrate a lot of configuration to /application/config/pvcs_core.php
+	 *  - check if you are in a repository before commiting!
 	 */
 	class Pvcs_core
 	{
 		private $version = "PVCS core, version 0.0.1-alpha";
-		private $CI; // Instance of codeigniter stuff, kind of. Not sure if this will be necessary
+		private $CI; // Instance of codeigniter
 		private $dir; // current directory
 		public $allowed_commands = array();
 		private $out;
@@ -65,7 +66,14 @@
 		public function log($string)
 		{
 			$file = $this->dir . '/_repo/log.txt';
-			$this->mk($file,"\n".$string);
+			if( file_exists($file) )
+			{
+				$this->mk($file,"\n".$string);
+			}
+			else
+			{
+				$this->print_ln('error: cannot log here');
+			}
 		}
 		
 		public function status(){}
@@ -87,7 +95,8 @@
 				$this->mkdir($repository_path.'/commits');
 				
 				// Try to create some files
-				$this->mk($repository_path.'/commits/commits.txt');
+				$this->mk($repository_path.'/commits/commits.json');
+				$this->mk($repository_path.'/log.txt');
 				
 				$success = 'Successfully initiated repository';
 				$this->log($success);
@@ -129,38 +138,39 @@
 		
 		public function commit()
 		{
-			// Get all files in the repository
 			$files = get_filenames($this->dir,TRUE);
-			
-			// This is what will be removed
-			$remove = $this->dir.'/';
-			
-			$all_files = "";
+			$commit_name = "";
+			$earlier_commits = read_file($this->dir.'_repo/commits/commits.json');
+			$remove = '/';
 			
 			foreach( $files as $index => $file )
 			{
-				$file = preg_replace('#^'.$remove.'#','',$file);
-				$all_files .= file_get_contents($file);
-				$files[$index] = $file;
+				// Remove repository files from archive
+				if(preg_match('#_repo#',$file))
+				{
+					unset($files[$index]);
+					continue;
+				}
+				
+				if( file_exists($file) )
+				{
+					$commit_name = sha1( $commit_name . sha1_file( $file ) );
+					$files[$index] = array($file,sha1_file($file));
+				}
+				else
+				{
+					$this->print_ln('error: file not found \''.$file.'\'');
+				}
 			}
 			
-			$commit_name = sha1($all_files);
+			// Print and log the commit name
+			$this->print_ln('commit name is '.$commit_name);
+			$this->log('Rendered commit name: '.$commit_name);
 			
 			// Loop through the files
 			foreach( $files as $file )
 			{
-				// Delete dat shit
-				$nfile = preg_replace('#^'.$remove.'#','',$file);
-				
-				// Make sure the _repo files are not archived
-				if( preg_match('#^_repo/#',$nfile) )
-				{
-					continue;
-				}
-				
-				$part_file_name = sha1($nfile);
-				
-				$this->print_ln($nfile . ': created part-file; '.$part_file_name);
+				$this->print_ln('Created part-file for \''.$file[0].'\': '.$file[1]);
 			}
 		}
 		
