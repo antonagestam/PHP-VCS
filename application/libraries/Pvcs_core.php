@@ -138,40 +138,7 @@
 		
 		public function commit()
 		{
-			$files = get_filenames($this->dir,TRUE);
-			$commit_name = "";
-			$earlier_commits = read_file($this->dir.'_repo/commits/commits.json');
-			$remove = '/';
 			
-			foreach( $files as $index => $file )
-			{
-				// Remove repository files from archive
-				if(preg_match('#_repo#',$file))
-				{
-					unset($files[$index]);
-					continue;
-				}
-				
-				if( file_exists($file) )
-				{
-					$commit_name = sha1( $commit_name . sha1_file( $file ) );
-					$files[$index] = array($file,sha1_file($file));
-				}
-				else
-				{
-					$this->print_ln('error: file not found \''.$file.'\'');
-				}
-			}
-			
-			// Print and log the commit name
-			$this->print_ln('commit name is '.$commit_name);
-			$this->log('Rendered commit name: '.$commit_name);
-			
-			// Loop through the files
-			foreach( $files as $file )
-			{
-				$this->print_ln('Created part-file for \''.$file[0].'\': '.$file[1]);
-			}
 		}
 		
 		// Output methods
