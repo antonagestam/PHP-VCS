@@ -41,8 +41,9 @@
 				'dir' => array(1,0),
 				'pvcs' => array(1,1),
 				'logout' => array(0,0),
-				''
-			);
+				'pd' => array(1,0),
+				'parse_commands' => array(0,0),
+		);
 		private $out = "";
 		private $data = array();
 		private $aliases = array(
@@ -406,6 +407,36 @@
 			}
 		}
 		
+		private function parse_commands($string = '-i 103 -b -string "hej!"')
+		{
+			$chunks = explode(' ',$string);
+			$commands = array();
+			$pattern = '';
+			
+			foreach($chunks as $index => $chunk)
+			{
+				$next = isset($chunks[$index+1]);
+				
+				if( preg_match($pattern,$chunk) )
+				{
+					if( $next == TRUE && preg_match($pattern,$chunks[$index+1]) )
+					{
+						$commands[$chunk] = TRUE;
+					}
+					elseif( $next == TRUE )
+					{
+						$commands[$chunk] = $chunks[$index+1];
+					}
+					else
+					{
+						$commands[$chunk] = TRUE;
+					}
+				}
+			}
+			
+			return $commands;
+		}
+		
 		private function set_prompt($user=NULL,$branch=NULL,$dir=NULL)
 		{
 			if($user==NULL)
@@ -491,6 +522,13 @@
 			}
 			
 			return $string;
+		}
+		
+		private function pd($inp)
+		{
+			$commands = $this->parse_commands($inp);
+			//$this->print_ln( $commands[ 'i' ] );
+			$this->print_ln('hej');
 		}
 		
 		public function __destruct()
