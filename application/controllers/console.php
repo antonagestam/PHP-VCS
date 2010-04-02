@@ -67,12 +67,6 @@
 			
 			// Load the core library
 			$this->load->library('pvcs_core');
-			
-			// block all computers but mine, while developing
-			if( $this->input->server('REMOTE_ADDR') != '192.168.1.125' )
-			{
-				die('You lack authority');
-			}
 						
 			// Fetch sessiondata to data cache
 			foreach($this->sessiondata as $index)
