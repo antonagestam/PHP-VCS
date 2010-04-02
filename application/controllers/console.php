@@ -41,7 +41,7 @@
 				'dir' => array(1,0),
 				'pvcs' => array(1,1),
 				'logout' => array(0,0),
-				'gcd' => array(0,0),
+				''
 			);
 		private $out = "";
 		private $data = array();
@@ -224,11 +224,6 @@
 			}
 			
 			$this->set_prompt();
-		}
-		
-		private function gcd()
-		{
-			$this->print_ln('current directory is '.$this->get_data('dir'));
 		}
 		
 		private function dir()
