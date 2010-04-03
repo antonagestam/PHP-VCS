@@ -23,10 +23,7 @@
 	 *  - Migrate a lot of configuration to /application/config/console.php
 	 *  ? Can parse_query() use call_user_func_array()?
 	 *  - Fix utilize_aliases() method
-<<<<<<< HEAD
-=======
 	 *  - Hide password
->>>>>>> rework
 	 */
 
 	define('STATIC_DIRECTORY',getcwd());
@@ -45,14 +42,9 @@
 				'dir' => array(1,0),
 				'pvcs' => array(1,1),
 				'logout' => array(0,0),
-<<<<<<< HEAD
-				'gcd' => array(0,0),
-			);
-=======
 				'pd' => array(1,0),
 				'parse_commands' => array(0,0),
 		);
->>>>>>> rework
 		private $out = "";
 		private $data = array();
 		private $aliases = array(
@@ -77,15 +69,6 @@
 			
 			// Load the core library
 			$this->load->library('pvcs_core');
-<<<<<<< HEAD
-			
-			// block all computers but mine, while developing
-			if( $this->input->server('REMOTE_ADDR') != '192.168.1.125' )
-			{
-				die('You lack authority');
-			}
-=======
->>>>>>> rework
 						
 			// Fetch sessiondata to data cache
 			foreach($this->sessiondata as $index)
@@ -245,14 +228,6 @@
 			$this->set_prompt();
 		}
 		
-<<<<<<< HEAD
-		private function gcd()
-		{
-			$this->print_ln('current directory is '.$this->get_data('dir'));
-		}
-		
-=======
->>>>>>> rework
 		private function dir()
 		{
 			$this->ls();
@@ -433,8 +408,6 @@
 			}
 		}
 		
-<<<<<<< HEAD
-=======
 		private function parse_commands($string = '-i 103 -b -string "hej!"')
 		{
 			$chunks = explode(' ',$string);
@@ -465,7 +438,6 @@
 			return $commands;
 		}
 		
->>>>>>> rework
 		private function set_prompt($user=NULL,$branch=NULL,$dir=NULL)
 		{
 			if($user==NULL)
@@ -553,8 +525,6 @@
 			return $string;
 		}
 		
-<<<<<<< HEAD
-=======
 		private function pd($inp)
 		{
 			$commands = $this->parse_commands($inp);
@@ -562,7 +532,6 @@
 			$this->print_ln('hej');
 		}
 		
->>>>>>> rework
 		public function __destruct()
 		{
 			// can we move the insertion of the data values to the session
