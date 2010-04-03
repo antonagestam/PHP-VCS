@@ -1,5 +1,5 @@
 $(document).ready(function(){
-	var rc = {
+	var rc = { // creates a remote console handler
 		query:'',
 		output:'',
 		prompt:'',
@@ -7,36 +7,45 @@ $(document).ready(function(){
 			send:function(){
 				$.ajax({
 					cache:false,
-					data:{query:this.query},
+					data:{query:rc.query},
 					dataType:'json',
 					type:'POST',
-					timeout:10000,
+					//timeout:10000,
 					success:function(data){
-						// console.log(data); //debug
+						//console.log(data); //debug
 						rc.output = data.output;
 						rc.prompt = data.prompt;
-						rc.remote.status = 4;
+						rc.local.updatestatus(4);
 					},
 					complete:function()
 					{
-						rc.remote.status = 5;
+						rc.local.updatestatus(5);
+						rc.local.updateconsole();
 					},
 					beforeSend:function()
 					{
-						rc.remote.status = 2;
+						rc.local.updatestatus(2);
 					},
 					error:function(xhr,status,error)
 					{
-						rc.remote.status = 3;
+						rc.local.updatestatus(3);
 					}
 				});
 			},
 			status:1
 		},
 		local:{
-			updateconsole:function(){},
-			updatestate:function(){
-				var status = rc.remote.status;
+			updateconsole:function(){
+				//console.log('local.updateconsole() received output: "'+rc.output+'"');//debug
+				//console.log('local.updateconsole() received prompt: "'+rc.prompt+'"');//debug
+				// Update the output field
+				$('#output').append(rc.output);
+				// Update the prompt field
+				$('#user').html(rc.prompt+"&nbsp;");
+				// Delete the old query from the query field and focus! :)
+				$('.input').val('').focus();
+			},
+			updatestatus:function(status){
 				if(status == 1)
 				{
 					status = 'Nothing sent yet';
@@ -57,12 +66,12 @@ $(document).ready(function(){
 				{
 					status = 'Status is OK';
 				}
-				
+				//console.log(status); //debug
 				$('#status-bar').text(status);
 			},
 			getquery:function(){
 				rc.query = $('.input').val();
-				console.log('collected query: "'+rc.query+'"'); //debug
+				//console.log('collected query: "'+rc.query+'"'); //debug
 			}
 		},
 		execute:function(){
@@ -75,15 +84,34 @@ $(document).ready(function(){
 			else
 			{
 				this.remote.send();
-				this.local.updateconsole();
-				this.local.updatestate();
 			}
 		},
 		clear:function(){}
 	}
 	
+	var updateWidth = function()
+	{
+		var maxwidth = $('#newrow').width();
+		maxwidth = maxwidth - $('#user').outerWidth();
+		spaces = $('.input').outerWidth() - $('.input').width();
+		newwidth = maxwidth - spaces;
+		$('.input').width(newwidth);
+		//console.log('resized to: '+newwidth);//debug
+	}
+	
+	// Communicate with the server via the remote console handler
+	// when the user submits a query
 	$('#input').submit(function(){
 		rc.execute();
 		return false;
 	});
+	
+	// Make sure that the query field is always focused
+	$('body,html,#output,#input,#statusbar').click(function(){
+		$('.input').focus();
+	});
+	
+	// Make sure that the size of the query field always is as wide as possible :)
+	updateWidth();
+	$(window).resize(updateWidth);
 });

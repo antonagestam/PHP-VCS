@@ -23,6 +23,7 @@
 	 *  - Migrate a lot of configuration to /application/config/console.php
 	 *  ? Can parse_query() use call_user_func_array()?
 	 *  - Fix utilize_aliases() method
+	 *  - Hide password
 	 */
 
 	define('STATIC_DIRECTORY',getcwd());
