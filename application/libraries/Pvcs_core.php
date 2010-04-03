@@ -138,6 +138,7 @@
 		
 		public function commit()
 		{
+<<<<<<< HEAD
 			$files = get_filenames($this->dir,TRUE);
 			$commit_name = "";
 			$earlier_commits = read_file($this->dir.'_repo/commits/commits.json');
@@ -171,6 +172,48 @@
 			foreach( $files as $file )
 			{
 				$this->print_ln('Created part-file for \''.$file[0].'\': '.$file[1]);
+=======
+			$repo_dir = $this->dir.'/_repo';
+			if( !file_exists($repo_dir) )
+			{
+				$this->print_ln('error: could not find a repository');
+			}
+			else
+			{
+				$files = glob($this->dir.'/*');
+				$commits = json_decode(read_file($repo_dir.'commits/commits.json'));
+				$commitname = "";
+				
+				// remove repository files and create a commit name
+				foreach($files as $index => $file)
+				{
+					if( preg_match('#_repo#',$file) )
+					{
+						unset($files[$index]);
+						continue;
+					}
+					
+					$commitname = sha1( $commitname . sha1_file($file) );
+				}
+				
+				$this->print_ln('Created commit-name: '.$commitname);
+				$this->log('Rendered commit name: '.$commitname);
+				
+				// if there is sumethin to commit
+				foreach($files as $file)
+				{
+					$foldername = sha1($file);
+					$folderpath = $repo_dir.'/parts/'.$foldername;
+					if( !file_exists($folderpath) )
+					{
+						$this->mkdir($folderpath);
+					}
+					// add zip here
+					$this->mk($folderpath.'/'.$commitname,read_file($file));
+				}
+				
+				$this->print_ln('successfully commited');
+>>>>>>> rework
 			}
 		}
 		
