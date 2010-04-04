@@ -28,7 +28,17 @@ margin: 			0 0 4px 0;
 <body>
 	<div id="content">
 		<h1><?php echo $heading; ?></h1>
-		<?php echo $message; ?>
+		<?php 
+			if( preg_match('#page#',$message) )
+			{
+				echo $message;
+				echo '<p>'.htmlentities($_SERVER['REQUEST_URI']).'</p>';
+			}
+			else
+			{
+				echo $message;
+			}
+			?>
 	</div>
 </body>
 </html>

@@ -3,9 +3,11 @@
 	{
 		public $static_directory = "static/";
 		public $view = "raw";
+		
 		public function __construct()
 		{
 			parent::Controller();
+			$this->index();
 		}
 		
 		public function Index()
@@ -20,18 +22,18 @@
 			{
 				$content = $this->minify_css($content);
 			}
-			
+						
 			$data = array(
 				'content' => $content,
 			);
 			
 			$this->output->set_header('Content-type: '.$mime);
 			// Turn off while developing css/js
-			$this->output->set_header('Expires: '.$date);
+			//$this->output->set_header('Expires: '.$date);
 			$this->load->view($this->view,$data);
 		}
 		
-		public function minify_css($css)
+		private function minify_css($css)
 		{
 			$css = preg_replace( '#\s+#', ' ', $css );
 			$css = preg_replace( '#/\*.*?\*/#s', '', $css );

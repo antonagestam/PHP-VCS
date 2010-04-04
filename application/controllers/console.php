@@ -8,7 +8,6 @@
 	 * D Deleted = not valid
 	 * 
 	 * 	TODO
-	 *  \ attribute handling
 	 *  - suggest command while writing in console
 	 *  X Show the user the state of the ajax request
 	 *  \ Migrate all repository methods to a library and keep the console methods here
@@ -24,6 +23,7 @@
 	 *  ? Can parse_query() use call_user_func_array()?
 	 *  - Fix utilize_aliases() method
 	 *  - Hide password
+	 *  \ Fix a real command parser
 	 */
 
 	define('STATIC_DIRECTORY',getcwd());
@@ -31,12 +31,11 @@
 	
 	class Console extends Controller
 	{
-		private $version = "PVCS console, version 0.0.2-beta";
+		private $version = "PVCS console, version 0.0.3-beta";
 		private $allowed_commands = array(
 				// The allowed commands is stored according to this pattern:
 				// '_method name_' => array(_max paramaters_,_min parameters_),
 				'help' => array(1,0),
-				'clear' => array(0,0),
 				'cd' => array(1,1),
 				'ls' => array(1,0),
 				'dir' => array(1,0),
@@ -181,9 +180,7 @@
 		{
 			$this->out .= $string;
 		}
-		
-		private function clear(){}
-		
+				
 		private function ls()
 		{
 			$path = $this->get_data('dir');

@@ -43,8 +43,6 @@
 $route['default_controller'] = "console";
 $route['scaffolding_trigger'] = "";
 $route['static:any'] = 'static_files';
-$route['pvcs'] = 'console';
-
 
 /* End of file routes.php */
 /* Location: ./system/application/config/routes.php */

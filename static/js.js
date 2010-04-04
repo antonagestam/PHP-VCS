@@ -1,5 +1,12 @@
 $(document).ready(function(){
-	var rc = { // creates a remote console handler
+	// Fetch all elements :)
+	var inputfield = $('.input');
+	var inputform = $('#input');
+	var output = $('#output');
+	var prompt = $('#user');
+	var statusbar = $('#status-bar');
+	
+	var rc = { // create a remote console handler
 		query:'',
 		output:'',
 		prompt:'',
@@ -10,17 +17,34 @@ $(document).ready(function(){
 					data:{query:rc.query},
 					dataType:'json',
 					type:'POST',
-					//timeout:10000,
-					success:function(data){
+					timeout:10000,
+					success:function(data,ts){
 						//console.log(data); //debug
-						rc.output = data.output;
-						rc.prompt = data.prompt;
-						rc.local.updatestatus(4);
+						//console.log(ts); //debug
+						if(data == null)
+						{
+							rc.local.updatestatus(3,ts);
+						}
+						else
+						{
+							rc.output = data.output;
+							rc.prompt = data.prompt;
+							rc.local.updatestatus(4);
+						}
 					},
-					complete:function()
+					complete:function(xhr,textstatus)
 					{
-						rc.local.updatestatus(5);
-						rc.local.updateconsole();
+						if(textstatus == 'success')
+						{
+							rc.local.updatestatus(5);
+							rc.local.updateconsole();
+						}
+						else
+						{
+							rc.local.updatestatus(3,textstatus);
+						}
+						//console.log(xhr);//debug
+						//console.log(textstatus);//debug
 					},
 					beforeSend:function()
 					{
@@ -29,6 +53,9 @@ $(document).ready(function(){
 					error:function(xhr,status,error)
 					{
 						rc.local.updatestatus(3);
+						//alert('error says hi!');//debug
+						//console.log(status);//debug
+						//console.log(error);//debug
 					}
 				});
 			},
@@ -39,13 +66,15 @@ $(document).ready(function(){
 				//console.log('local.updateconsole() received output: "'+rc.output+'"');//debug
 				//console.log('local.updateconsole() received prompt: "'+rc.prompt+'"');//debug
 				// Update the output field
-				$('#output').append(rc.output);
+				output.append(rc.output);
 				// Update the prompt field
-				$('#user').html(rc.prompt+"&nbsp;");
+				prompt.html(rc.prompt+"&nbsp;");
 				// Delete the old query from the query field and focus! :)
-				$('.input').val('').focus();
+				inputfield.val('').focus();
+				
+				updateWidth();
 			},
-			updatestatus:function(status){
+			updatestatus:function(status,message){
 				if(status == 1)
 				{
 					status = 'Nothing sent yet';
@@ -57,6 +86,10 @@ $(document).ready(function(){
 				else if(status == 3)
 				{
 					status = 'An error occured';
+					if(message != null)
+					{
+						status += ': '+message;
+					}
 				}
 				else if(status == 4)
 				{
@@ -67,10 +100,10 @@ $(document).ready(function(){
 					status = 'Status is OK';
 				}
 				//console.log(status); //debug
-				$('#status-bar').text(status);
+				statusbar.text(status);
 			},
 			getquery:function(){
-				rc.query = $('.input').val();
+				rc.query = inputfield.val();
 				//console.log('collected query: "'+rc.query+'"'); //debug
 			}
 		},
@@ -86,7 +119,10 @@ $(document).ready(function(){
 				this.remote.send();
 			}
 		},
-		clear:function(){}
+		clear:function(){
+			output.text('');
+			inputfield.val('');
+		}
 	}
 	
 	var updateWidth = function()
