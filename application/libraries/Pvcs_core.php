@@ -12,6 +12,7 @@
 	 *  - help method
 	 *  - Migrate a lot of configuration to /application/config/pvcs_core.php
 	 *  - check if you are in a repository before commiting!
+	 *  - rename commits.json -- it's not json! commits.serialized?
 	 */
 	class Pvcs_core
 	{
@@ -77,7 +78,16 @@
 			}
 		}
 		
-		public function status(){}
+		public function status($attr)
+		{
+			if( isset($attr['dump']) )
+			{
+				$this->print_ln('Attempting to dump commits.json');
+				$dir = $this->dir;
+				$file = $this->arrget( $dir . '/_repo/commits/commits.json' );
+				$this->print_r($file);
+			}
+		}
 		
 		// Create a repository
 		public function init()
@@ -129,6 +139,25 @@
 			}
 		}
 		
+		private function arrput($file,$array)
+		{
+			$content = read_file($file);
+			if(!empty($content))
+			{
+				$content = unserialize($content);
+				$array = array_merge($content,$array);
+			}
+			$string = serialize($array);
+			write_file($file,$string);
+			return true;
+		}
+		
+		private function arrget($file)
+		{
+			$content = read_file($file);
+			return unserialize($content);
+		}
+		
 		public function checkout(){}
 		
 		public function add(){}
@@ -175,7 +204,13 @@
 						$this->mkdir($folderpath);
 					}
 					// add zip here
+					// write the part-file
 					$this->mk($folderpath.'/'.$commitname,read_file($file));
+					// add the file to commits.json
+					$commits = $repo_dir.'/commits/commits.json';
+					$array = array();
+					$array[$foldername] = $file;
+					$this->arrput($commits,$array);
 				}
 				
 				$this->print_ln('successfully commited');
@@ -196,6 +231,15 @@
 		private function print_ln($string=NULL)
 		{
 			$this->add_out($string."<br/>\n");
+		}
+		
+		private function print_r($array)
+		{
+			ob_start();
+			print_r($array);
+			$ob = ob_get_contents();
+			ob_end_clean();
+			$this->print_ln('<pre>'.$ob.'</pre>');
 		}
 		
 		public function set_dir($dir)

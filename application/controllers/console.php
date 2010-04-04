@@ -17,7 +17,7 @@
 	 *  X Create a data handler (cache?)
 	 *  - Add sha1 and salt to pw
 	 *  - Create create_user() method
-	 *  - Add support for database stored users
+	 *  ? Add support for database stored users
 	 *  - Add support for aliases
 	 *  - Migrate a lot of configuration to /application/config/console.php
 	 *  ? Can parse_query() use call_user_func_array()?
@@ -27,6 +27,7 @@
 	 *  - Fix the javascript "parseerror"
 	 *  	aka "An error occured during transfer: parsererror"
 	 *  	that comes on query "pd"
+	 *  - Remove the extra 'error!' on 'no such command or library'
 	 */
 
 	define('STATIC_DIRECTORY',getcwd());
@@ -34,7 +35,7 @@
 	
 	class Console extends Controller
 	{
-		private $version = "PVCS console, version 0.0.4-alpha";
+		private $version = "PVCS console, version 0.0.4-beta";
 		private $allowed_commands = array(
 				// The allowed commands is stored according to this pattern:
 				// '_method name_' => array(_max paramaters_,_min parameters_),
@@ -49,10 +50,10 @@
 		);
 		private $out = "";
 		private $data = array();
-		private $aliases = array(
-			'pvcs' => 'pvcs_core',
-			'vcs' => 'pvcs_core',
-		);
+		//private $aliases = array(
+		//	'pvcs' => 'pvcs_core',
+		//	'vcs' => 'pvcs_core',
+		//);
 		private $query; // current query
 		private $sessiondata = array(
 			'user',
@@ -314,8 +315,30 @@
 				$query = $this->extract_attributes($query);
 				if( isset($query['library']) )
 				{
+					// Load the library
 					$this->load->library($query['library']);
-					$this->$query['library']->$query['command']($query['attributes']);
+					// If set_dir() exists execute it
+					if( method_exists($this->$query['library'],'set_dir') )
+					{
+						$dir = $this->get_data('dir');
+						$this->$query['library']->set_dir($dir);
+					}
+					// If the command exists, execute it
+					if( method_exists($this->$query['library'],$query['command']) )
+					{
+						$this->$query['library']->$query['command']($query['attributes']);
+						
+						// If get_output exists, add that to the console output
+						if( method_exists($this->$query['library'],'get_output') )
+						{
+							$this->add_out( $this->$query['library']->get_output() );
+						}
+					}
+					else
+					{
+						// Else, error
+						$this->print_ln('error: command does not exist in that library');
+					}
 				}
 				elseif( isset($query['command']) )
 				{
