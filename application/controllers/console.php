@@ -302,21 +302,24 @@
 					}
 					else
 					{
-						$this->print_ln('error: wrong password for `'.htmlentities($query).'`');
+						$this->print_ln('error: wrong password for `'.htmlentities($temp_user).'`');
 						return $prompt;
 					}
 				}
 			}
 			elseif( !empty( $query ) && !empty( $user ) )
 			{
-				// Print the query
+				// Print the query together with the prompt
 				$this->print_ln($this->get_data('default_prompt').' '.$query);
 				
-				// Fetch the the command (method) from the query
+				// Fetch the the command from the query
 				preg_match('#^(\w+)[[ \w*]|$]#',$query,$matches);
 				$command = $matches[0];
+				// Get number of characters in the first chunk
 				$strlen = strlen($command);
+				// Remove spaces from command
 				$command = trim($matches[0]);
+				// Extract chunks and remove first command
 				$attributes = explode( " ", trim(substr(trim($query),$strlen)) );
 				
 				if( count( $attributes ) == 1 && empty( $attributes[0] ) )
@@ -324,7 +327,7 @@
 					unset($attributes[0]);
 				}
 				
-				// Get all allowed commands
+				// Get all allowed commands and libraries
 				$commands = $this->allowed_commands;
 				$libraries = $this->libraries;
 				
@@ -334,11 +337,11 @@
 					$count = count($attributes);
 					if( $count > $commands[$command][0] )
 					{
-						$this->print_ln('error: wrong parameter count[1]; '.$count);
+						$this->print_ln('error: wrong parameter count (too many): '.$count);
 					}
 					elseif( $count < $commands[$command][1] )
 					{
-						$this->print_ln('error: wrong parameter count[2]'.$count);
+						$this->print_ln('error: wrong parameter count (too few): '.$count);
 					}
 					else
 					{

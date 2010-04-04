@@ -85,7 +85,7 @@ $(document).ready(function(){
 				}
 				else if(status == 3)
 				{
-					status = 'An error occured';
+					status = 'An error occured during transfer';
 					if(message != null)
 					{
 						status += ': '+message;
@@ -143,6 +143,7 @@ $(document).ready(function(){
 	});
 	
 	// Make sure that the query field is always focused
+	$('.input').focus();
 	$('body,html,#output,#input,#statusbar').click(function(){
 		$('.input').focus();
 	});
