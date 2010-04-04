@@ -43,7 +43,6 @@
 				'ls',
 				'dir',
 				'logout',
-				'pd',
 		);
 		private $libraries = array(
 			'pvcs_core',
