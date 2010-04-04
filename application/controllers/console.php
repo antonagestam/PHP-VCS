@@ -24,6 +24,9 @@
 	 *  - Fix utilize_aliases() method
 	 *  - Hide password
 	 *  \ Fix a real command parser
+	 *  - Fix the javascript "parseerror"
+	 *  	aka "An error occured during transfer: parsererror"
+	 *  	that comes on query "pd"
 	 */
 
 	define('STATIC_DIRECTORY',getcwd());
@@ -35,23 +38,21 @@
 		private $allowed_commands = array(
 				// The allowed commands is stored according to this pattern:
 				// '_method name_' => array(_max paramaters_,_min parameters_),
-				'help' => array(1,0),
-				'cd' => array(1,1),
-				'ls' => array(1,0),
-				'dir' => array(1,0),
-				'pvcs' => array(1,1),
-				'logout' => array(0,0),
-				'pd' => array(1,0),
-				'parse_commands' => array(0,0),
+				'help',
+				'cd',
+				'ls',
+				'dir',
+				'logout',
+				'pd',
+		);
+		private $libraries = array(
+			'pvcs_core',
 		);
 		private $out = "";
 		private $data = array();
 		private $aliases = array(
 			'pvcs' => 'pvcs_core',
 			'vcs' => 'pvcs_core',
-		);
-		private $libraries = array(
-			'pvcs_core',
 		);
 		private $query; // current query
 		private $sessiondata = array(
@@ -65,9 +66,6 @@
 		public function __construct()
 		{
 			parent::Controller();
-			
-			// Load the core library
-			$this->load->library('pvcs_core');
 						
 			// Fetch sessiondata to data cache
 			foreach($this->sessiondata as $index)
@@ -191,8 +189,10 @@
 			}
 		}
 		
-		private function cd($new_dir)
+		private function cd($attr)
 		{
+			$new_dir = $attr['main'];
+			
 			// Go to the current directory
 			chdir($this->get_data('dir'));
 			
@@ -311,131 +311,87 @@
 			{
 				// Print the query together with the prompt
 				$this->print_ln($this->get_data('default_prompt').' '.$query);
-				
-				// Fetch the the command from the query
-				preg_match('#^(\w+)[[ \w*]|$]#',$query,$matches);
-				$command = $matches[0];
-				// Get number of characters in the first chunk
-				$strlen = strlen($command);
-				// Remove spaces from command
-				$command = trim($matches[0]);
-				// Extract chunks and remove first command
-				$attributes = explode( " ", trim(substr(trim($query),$strlen)) );
-				
-				if( count( $attributes ) == 1 && empty( $attributes[0] ) )
+				$query = $this->extract_attributes($query);
+				if( isset($query['library']) )
 				{
-					unset($attributes[0]);
+					$this->load->library($query['library']);
+					$this->$query['library']->$query['command']($query['attributes']);
 				}
-				
-				// Get all allowed commands and libraries
-				$commands = $this->allowed_commands;
-				$libraries = $this->libraries;
-				
-				// Check if the method exists and the command is allowed
-				if( array_key_exists($command,$commands) && method_exists($this,$command) )
+				elseif( isset($query['command']) )
 				{
-					$count = count($attributes);
-					if( $count > $commands[$command][0] )
-					{
-						$this->print_ln('error: wrong parameter count (too many): '.$count);
-					}
-					elseif( $count < $commands[$command][1] )
-					{
-						$this->print_ln('error: wrong parameter count (too few): '.$count);
-					}
-					else
-					{
-						if( $count == 1 )
-						{
-							$this->$command($attributes[0]);
-						}
-						elseif( $count < 1 )
-						{
-							$this->$command();
-						}
-						else
-						{
-							$this->$command($attributes);
-						}
-					}
-				}
-				elseif( in_array($command,$libraries) )
-				{
-					// Set $library to $command
-					$library = $command;
-					// Glue together the attributes
-					$attr_str = trim( implode(" ",$attributes) );
-					// Extract the command
-					preg_match('#^(\w+)[[ \w*]|$]#',$attr_str,$matches);
-					// Fetch command from matches
-					$command = trim($matches[0]);
-					
-					// Load library
-					$this->load->library($library);
-					
-					// Check if the command exist
-					if( method_exists( $this->$library, $command ) )
-					{
-						// If set_dir exists, set the directory
-						if( method_exists( $this->$library, 'set_dir' ) )
-						{
-							$dir = $this->get_data('dir');
-							$this->$library->set_dir($dir);
-						}
-						
-						// Execute method
-						$this->$library->$command();
-						
-						// Get the libraries output
-						if( method_exists( $this->$library, 'get_output' ) )
-						{
-							$this->add_out($this->$library->get_output());
-						}
-						else
-						{
-							$this->print_ln('error: get_output is missing in library `'.$library.'`');
-						}
-					}
-					else
-					{
-						$this->print_ln('error: command `'.$command.'`does not exist in library `'.$library.'`');
-					}
+					$this->$query['command']($query['attributes']);
 				}
 				else
 				{
-					$this->print_ln('error: no such command or library');
+					$this->print_ln('error!');
 				}
 			}
 		}
 		
-		private function parse_commands($string = '-i 103 -b -string "hej!"')
+		private function extract_attributes($query)
 		{
-			$chunks = explode(' ',$string);
-			$commands = array();
-			$pattern = '';
+			$chunks = explode(' ',$query);
+			
+			if( method_exists($this,$chunks[0]) && in_array($chunks[0],$this->allowed_commands) )
+			{
+				$return['command'] = $chunks[0];
+				unset($chunks[0]);
+			}
+			elseif( in_array($chunks[0],$this->libraries) )
+			{
+				$return['library'] = $chunks[0];
+				if( isset($chunks[1]))
+				{
+					$return['command'] = $chunks[1];
+					unset($chunks[0]);
+					unset($chunks[1]);
+				}
+				else
+				{
+					$this->print_ln('error: your query had no command');
+					return false;
+				}
+			}
+			else
+			{
+				$this->print_ln('error: no such command or library');
+				return false;
+			}
+			
+			$return['attributes'] = array();
+			$first = TRUE;
 			
 			foreach($chunks as $index => $chunk)
 			{
-				$next = isset($chunks[$index+1]);
+				$pattern = '#^-(\w.*)#';
+				$next = isset( $chunks[$index+1] ) ? $chunks[$index+1] : null;
 				
 				if( preg_match($pattern,$chunk) )
 				{
-					if( $next == TRUE && preg_match($pattern,$chunks[$index+1]) )
+					$name = substr($chunk,1);
+					if( !empty($next) && !preg_match($pattern,$next) )
 					{
-						$commands[$chunk] = TRUE;
-					}
-					elseif( $next == TRUE )
-					{
-						$commands[$chunk] = $chunks[$index+1];
+						$return['attributes'][$name] = $next;
+						unset($chunks[$index+1]);
 					}
 					else
 					{
-						$commands[$chunk] = TRUE;
+						$return['attributes'][$name] = TRUE;
 					}
 				}
+				elseif( $first === TRUE )
+				{
+					$return['attributes']['main'] = $chunk;
+				}
+				else
+				{
+					continue;
+				}
+				
+				$first = FALSE;
 			}
 			
-			return $commands;
+			return $return;
 		}
 		
 		private function set_prompt($user=NULL,$branch=NULL,$dir=NULL)
