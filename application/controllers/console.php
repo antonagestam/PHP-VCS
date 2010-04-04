@@ -34,7 +34,7 @@
 	
 	class Console extends Controller
 	{
-		private $version = "PVCS console, version 0.0.3-beta";
+		private $version = "PVCS console, version 0.0.4-alpha";
 		private $allowed_commands = array(
 				// The allowed commands is stored according to this pattern:
 				// '_method name_' => array(_max paramaters_,_min parameters_),
@@ -129,6 +129,7 @@
 		{
 			// Get all allowed commands
 			$methods = $this->allowed_commands;
+			asort($methods);
 			
 			if( $command == NULL )
 			{
@@ -138,9 +139,9 @@
 				$this->print_ln();
 				
 				// Print allowed commands
-				foreach($methods as $key => $method)
+				foreach($methods as $method)
 				{
-					$this->print_ln($key);
+					$this->print_ln($method);
 				}
 				
 				$this->print_ln();
@@ -467,7 +468,7 @@
 			return $password;
 		}
 		
-		private function Utilize_aliases($string)
+		private function utilize_aliases($string)
 		{
 			if( !empty($string) )
 			{
@@ -479,13 +480,6 @@
 			}
 			
 			return $string;
-		}
-		
-		private function pd($inp)
-		{
-			$commands = $this->parse_commands($inp);
-			//$this->print_ln( $commands[ 'i' ] );
-			$this->print_ln('hej');
 		}
 		
 		public function __destruct()
