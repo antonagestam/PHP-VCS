@@ -39,8 +39,9 @@
 			);
 		}
 		
-		public function help($command=NULL)
+		public function help($attr)
 		{
+			$command = empty($attr['main']) ? NULL : $attr['main'];
 			$methods = $this->allowed_commands;
 			
 			if( $command == NULL )
