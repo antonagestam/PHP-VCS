@@ -158,7 +158,15 @@
 			return unserialize($content);
 		}
 		
-		public function checkout(){}
+		public function checkout($commit_id)
+		{
+			//$commits = arrget('_repo/commits/commits.json');
+			$this->print_ln('f');
+			/*foreach($commits as $commit)
+			{
+				$this->print_ln($commit);
+			}*/
+		}
 		
 		public function add(){}
 		
