@@ -52,7 +52,6 @@
 		private $data = array();
 		//private $aliases = array(
 		//	'pvcs' => 'pvcs_core',
-		//	'vcs' => 'pvcs_core',
 		//);
 		private $query; // current query
 		private $sessiondata = array(
@@ -506,9 +505,7 @@
 		
 		public function __destruct()
 		{
-			// can we move the insertion of the data values to the session
-			// cookies to here?
-			// might be a bad idea ...
+			// can I move the insertion of the data values to the session cookies to here?
 			$this->print_ln('the end');
 		}
 	}
