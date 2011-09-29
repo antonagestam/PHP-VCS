@@ -1,4 +1,6 @@
 <?php
-	//$config['users'][*username*] = *password*;
-	$config['users']['anton'] = 'asdf';
-	$config['users']['kal'] = 'ada';
+	/*
+		To edit or add a new user, use this syntax:
+		$config['users']['*username*'] = '*password*';
+	*/
+	$config['users']['admin'] = 'password';

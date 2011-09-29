@@ -13,6 +13,7 @@
 	 *  - Migrate a lot of configuration to /application/config/pvcs_core.php
 	 *  - check if you are in a repository before commiting!
 	 *  - rename commits.json -- it's not json! commits.serialized?
+	 *  - check if there is any changes before comitting. As it works now there are duplicate entries in the part files in the comitted repository. BAD!
 	 */
 	class Pvcs_core
 	{
