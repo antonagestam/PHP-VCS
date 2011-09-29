@@ -8,6 +8,7 @@
 	 * D Deleted = not valid
 	 * 
 	 * 	TODO
+	 *  - upgrade to latest version of CodeIgniter (2.0.3?)
 	 *  - suggest command while writing in console
 	 *  X Show the user the state of the ajax request
 	 *  \ Migrate all repository methods to a library and keep the console methods here
@@ -15,18 +16,17 @@
 	 *  	- Create generic handler of libraries
 	 *  		? Use call_user_func_array()?
 	 *  X Create a data handler (cache?)
-	 *  - Add sha1 and salt to pw
+	 *  - Add hash and salt to pw
 	 *  - Create create_user() method
 	 *  ? Add support for database stored users
 	 *  - Add support for aliases
-	 *  - Migrate a lot of configuration to /application/config/console.php
+	 *  - Migrate most of the configuration to /application/config/console.php
 	 *  ? Can parse_query() use call_user_func_array()?
-	 *  - Fix utilize_aliases() method
-	 *  - Hide password
-	 *  \ Fix a real command parser
+	 *  - Create utilize_aliases() method
+	 *  - Hide password by utilizing the type="password" attribute
+	 *  \ Create a real command parser
 	 *  - Fix the javascript "parseerror"
-	 *  	aka "An error occured during transfer: parsererror"
-	 *  	that comes on query "pd"
+	 *  	aka "An error occured during transfer: parsererror" - that comes on query "pd"
 	 *  - Remove the extra 'error!' on 'no such command or library'
 	 */
 
@@ -35,7 +35,7 @@
 	
 	class Console extends Controller
 	{
-		private $version = "PVCS console, version 0.0.4-beta";
+		private $version = "PVCS console, version 0.0.5-beta";
 		private $allowed_commands = array(
 				// The allowed commands is stored according to this pattern:
 				// '_method name_' => array(_max paramaters_,_min parameters_),

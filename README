@@ -1,0 +1,10 @@
+|--------------------------------------------------------------|
+|--------------------     PVCS console     --------------------|
+|--------------------     v 0.0.5 beta     --------------------|
+|--------------------     Installation     --------------------|
+|--------------------------------------------------------------|
+
+1. Unzip the PVCS files to a directory on your web server
+2. Update $config['base_url'] in application/config/config.php
+3. Update user credentials in application/config/pvcs_users.php
+4. Done!
