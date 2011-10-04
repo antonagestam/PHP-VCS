@@ -15,6 +15,7 @@
 	 *  	D Create handler for the PVCS core library
 	 *  	- Create generic handler of libraries
 	 *  		? Use call_user_func_array()?
+	 *			+? Use CIs built-in library functionality
 	 *  X Create a data handler (cache?)
 	 *  - Add hash and salt to pw
 	 *  - Create create_user() method
@@ -28,13 +29,13 @@
 	 *  - Fix the javascript "parseerror"
 	 *  	aka "An error occured during transfer: parsererror" - that comes on query "pd"
 	 *  - Remove the extra 'error!' on 'no such command or library'
+	 *	- Rename utilize_aliases() => apply_aliases()
 	 */
 
 	define('STATIC_DIRECTORY',getcwd());
 	
 	
-	class Console extends Controller
-	{
+	class Console extends Controller{
 		private $version = "PVCS console, version 0.0.5-beta";
 		private $allowed_commands = array(
 				// The allowed commands is stored according to this pattern:
@@ -47,6 +48,7 @@
 		);
 		private $libraries = array(
 			'pvcs_core',
+			'utils'
 		);
 		private $out = "";
 		private $data = array();
@@ -65,7 +67,7 @@
 		public function __construct()
 		{
 			parent::Controller();
-						
+			
 			// Fetch sessiondata to data cache
 			foreach($this->sessiondata as $index)
 			{
@@ -327,7 +329,7 @@
 					{
 						$this->$query['library']->$query['command']($query['attributes']);
 						
-						// If get_output exists, add that to the console output
+						// If get_output exists, send that to the console output
 						if( method_exists($this->$query['library'],'get_output') )
 						{
 							$this->add_out( $this->$query['library']->get_output() );
@@ -345,7 +347,7 @@
 				}
 				else
 				{
-					$this->print_ln('error!');
+					//$this->print_ln('error!');
 				}
 			}
 		}
